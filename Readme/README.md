@@ -171,6 +171,126 @@ Prebacivanje sinkronog koda u asinkroni oblik često se radi kako bi se poboljš
         return await _context.Users.FindAsync(id);    
     } 
 ```
+
 7.Snimanje našeg koda u Source control
+
+Moramo instalirati git i napraviti git hub profil ako već nismo
+
+Kliknemo na Git hubu profilnu sliku s desne strane ekrana pa na settings, <>Development settings, Personal aces token, new classic token, zatim označimo polja  koja želimo i generiramo
+Obavezno snimiti personal aces token now, jer poslije neće biti moguće
+![Alt text](<Screenshot 2023-12-30 113136-1.png>)
+
+ući u vscode u comand line dati naredbu
+`git init` međutim ako bi commitali u ovom trenutku aplikacija bi poslala puno nepotrebnih stvari (preko 100 file-ova ) zato ćemo ipak dati naredbu `dotnet new gitignore` te ćemo  neke filove koje ne želimo objaviti javno kliknuti desnim klikom i dodati u git ignore
+isto tako i appsettings.json file
+zatim kliknemo na + znak kraj changes u source controlu dati ćemo ime repositoriu i klik na COMMIT
+
+Prije nego objavimo branch na gitu kreirat ćemo new repository na gitu dati mu ime i kreirat ćemo ga nakon čega će se pojaviti daljnje instrukcije
+
+`git branch -M main` komanda za mjenjanje imena branch-a
+
+`git remote add origin https://github.com/Zeljko1008/DatingApp.git` komanda za kreiranje novog direktorija na git hubu nakon koje možemo u vscodu u SOURCE CONTROL stisnuti dugme *Publish Branch*
+Odemo u Git Hub , refresh i vidimo naš app
+
+8.Creating Angular application
+
+Provjerit ćemo koju verziju Angulara imamo instaliranu, zatim Angular CLI i node js te dali su stabilne i kompatibilne 
+zatim ćemo kreirati Angular aplikacijom komandom u terminalu `ng new client` s tim da ćemo obratiti pozornost u kojem smo folderu prije toga
+
+sa `ng serve` pokrećemo našu angular aplikaciju 
+iz app.components.html brišemo sve
+
+8.Making http request in Angular
+
+Cilj trenutni je da oživimo kostur tako da očitamo bazu u našem angular appu.
+
+- prvi korak je da odemo u app.module.ts i da dodamo nešto što će povezati naš client (angular) sa API serverom. prvo ćemo ručno unesti HttpClient module
+
+  ![Alt text](<Screenshot 2023-12-30 172608.png>)
+
+- zatim ćemo otići na app.component.ts i želimo uvesti podatak iz app.module.ts
+
+- klasi AppComponent implementira OnInit sučelje, što znači da mora pružiti implementaciju ngOnInit metode. Kada se komponenta inicijalizira, Angular će automatski pozvati ovu metodu. To je dobro mjesto za postavljanje inicijalizacijskih zadataka koji trebaju biti obavljeni prije nego što se komponenta počne koristiti.
+
+- kreirat ćemo konstruktor u klasi AppComponent tako da kad se izvršava ta komponenta se izvršava i kod u konstruktoru
+
+```ts
+export class AppComponent implements OnInit{
+
+  title: string  = 'Dating App';
+  users: any; // Add this
+
+  constructor( private http: HttpClient) {}
+  ngOnInit(): void
+  {
+    this.http.get('https://localhost:5001/api/users').subscribe({
+      next : response => this.users = response,
+      error: error => console.log('error'),
+      complete: () => console.log('complete')
+    })
+  }
+```
+- s ovim kodom želimo dohvatiti http na ovoj lokaciji `https://localhost:5001/api/users`
+a vratit će nam se *Observable* (*U Angularu, Observable je deo Reactive Extensions (RxJS) biblioteke koja se koristi za rad sa asinkronim događajima i podacima. Observable predstavlja tok podataka koji možete posmatrati i reagovati na njegove promene. Angular koristi observables za rukovanje asinkronim operacijama kao što su HTTP zahtevi, događaji, promene stanja i mnoge druge situacije gde je asinkrono programiranje od značaja.*)
+- da bi posmatrali *Observable* moramo subscribe dodati šta želimo od povratne informacije, u ovom slučaju response želimo dodati useru, u slučaju pogreške želimo izbaciti eror , a uslučaju izvršenja ćemo ispisati poruku za sad poruku"complete"
+
+- međutim kad pokrenemo našu aplikaciju sada dobivamo nazad veliku grešku zbog browserovog security feature jer je nas origin na localhostu 5001 a angular koristi localhost 4200 i da bi tu grešku makli moramo u program.cs - u dodati kurs
+
+![Alt text](<Screenshot 2024-01-01 103435.png>)
+
+Sad smo prespojili podatke s Api-a i da bi vidjeli našu listu Usera i User Id moramo samo ubaciti direktivi *ngFor u naš html na sljedeći način
+
+```ts
+<ul>
+  <li *ngFor="let user of users">
+       {{user.id}} - {{user.userName}}
+  </li>
+</ul>
+```
+*Pripaziti na imena u .aspn i na Camel casing jer je jezik osjetljiv na velika slova pogotovo u dijelovima koda koji su u obliku stringa jer nam editor neće izbaciti grešku za isti*
+
+![Alt text](<Screenshot 2024-01-01 105126.png>)
+
+9.Adding Bootstrap and font-awsome 
+
+za instalaciju bootstrapa ćemo koristiti ngx-botstrap od Angulara
+
+[ngx-bootstrap](https://valor-software.com/ngx-bootstrap/#/documentation)
+i naredbu `ng add ngx-bootstrap`
+
+te za font-awsome  naredbu `npm install --save @fortawesome/fontawesome-free`
+
+nakon instalacije bootstrapa editor će sam uvesti link u json file dok za font-awsome moramo učiniti to sami
+
+![Alt text](<Screenshot 2024-01-01 112933.png>)
+
+Nakon ovog koraka još moramo instalirati ***mkcert*** certifikat , a da bi njega instalirali treba nam [chocolatey](https://chocolatey.org/) i kada smo sve instalirali stvorimo folder *ssl* damo naredbu `mkcert -install` te nakon nje naredbu `mkcert localhost` da bi dobili key file
+
+- Mkcert je alat koji olakšava postavljanje lokalnog HTTPS-a tijekom razvoja web aplikacija. Omogućava vam generiranje vlastitih lokalnih SSL certifikata za razvojne svrhe, bez potrebe za povjerenjem izdavatelja certifikata (CA). Ovo je korisno kada razvijate web stranice ili aplikacije koje zahtijevaju HTTPS, a želite simulirati sigurno okruženje na lokalnom računalu.
+
+Neki od glavnih razloga za korištenje mkcert uključuju:
+
+Lokalni razvoj s HTTPS-om: Omogućava vam rad s web stranicama koje zahtijevaju HTTPS čak i na lokalnom računalu, što može spriječiti problem s mješavinom sadržaja i omogućava vam simuliranje stvarnih uvjeta rada.
+
+Izbjegavanje sigurnosnih upozorenja preglednika: Kada koristite vlastite lokalne certifikate, možete izbjeći sigurnosna upozorenja preglednika koja se pojavljuju kada radite s nevaljanim certifikatima izdanima od strane nepouzdanih izdavatelja certifikata.
+
+Testiranje sigurnosnih značajki: Omogućava vam testiranje sigurnosnih značajki vaše web aplikacije ili usluge koje zahtijevaju HTTPS.
+
+Mkcert jednostavno pridonosi olakšavanju postavljanja sigurnog lokalnog okruženja za razvoj web aplikacija.
+
+![Alt text](<Screenshot 2024-01-01 132804.png>)
+
+Nakon toga odemo u file angular.json U i pod sekciju "serve" unesemo sljedeće 
+
+![Alt text](<Screenshot 2024-01-01 133414.png>)
+
+Sad kad ponovo pokrenemo aplikaciju neće više biti na http localhost 4200 već na https localhost 4200. Razlika između HTTP (Hypertext Transfer Protocol) i HTTPS (Hypertext Transfer Protocol Secure) leži u načinu prijenosa podataka između web preglednika korisnika i web poslužitelja.
+
+
+
+
+
+
+
 
 
