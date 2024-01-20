@@ -773,3 +773,288 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 na kraju još nam preostaje da u program.cs uvezemo nove extenzije :
 ![Alt text](<Screenshot 2024-01-08 183152.png>)
+
+23.Creating a nav bar
+
+Da bi dodali nav bar upotrijebit ćemo bootstrap i kad odemo na stranicu bootstrapa naći ćemo u examples nav bar koji je najsličniji onom što nama treba (Carousel) te ćemo ga kasnije malo doraditi.
+U našem terminalu pustit ćemo da api radi i client te ćemo otvoriti novi prozor u terminalu da bi iskoristili komande za brže generiranje za otvaranje novog foldera nav i tri nove komponente koje nam trebaju. Ako kroz terminal u client folderu unesemo naredbu `ng g --help` dobit ćemo listu komandi koje možemo koristiti:
+
+Commands:
+  `ng g schematic`           Run the provided schematic. [default]
+
+  `ng g app-shell`               Generates an application shell for running a server-side version of an app.
+
+  `ng g application` [name]       Generates a new basic application definition in the "projects" subfolder of the workspace.`[aliases: app]`
+
+  `ng g class` [name]             Creates a new, generic class definition in the given project. `[aliases: cl]`
+
+  `ng g component` [name]         Creates a new, generic component definition in the given project.  `[aliases: c]`
+
+  `ng g config` [type]            Generates a configuration file in the given project.
+
+  `ng g directive` [name]         Creates a new, generic directive definition in the given project.                         `[aliases: d]`
+
+  `ng g enum`[name]              Generates a new, generic enum definition in the given project.                             `[aliases: e]`
+
+  `ng g environments`          Generates and configures environment files for a project.
+
+  `ng g guard` [name]             Generates a new, generic route guard definition in the given project.                      `[aliases: g]`
+
+  `ng g interceptor`[name]       Creates a new, generic interceptor definition in the given project.
+
+ `ng g interface` [name] [type]  Creates a new, generic interface definition in the given project.                          `[aliases: i]`
+
+  `ng g library` [name]           Creates a new, generic library project in the current workspace.                         `[aliases: lib]`
+
+  `ng g module` [name]            Creates a new, generic NgModule definition in the given project.                          `[aliases: m]`
+
+  `ng g pipe` [name]              Creates a new, generic pipe definition in the given project.                               `[aliases: p]`
+
+  `ng g resolver` [name]          Generates a new, generic resolver definition in the given project.                         `[aliases: r]`
+
+  `ng g service` [name]           Creates a new, generic service definition in the given project.                            `[aliases: s]`
+
+ `ng g service-worker`           Pass this schematic to the "run" command to create a service worker
+
+  `ng g web-worker` [name]        Creates a new, generic web worker definition in the given project.
+
+Arguments:
+  schematic  The [collection:schematic] to run.                                                                                [string]
+
+Options:
+
+  `--help`        Shows a help message for this command in the console.                                    [boolean]
+
+  `--interactive`  Enable interactive input prompts.                                                            [boolean] [default: true]
+
+  `--dry-run`      Run through and reports activity without writing out results.                               [boolean] [default: false]
+
+  `--defaults`     Disable interactive input prompts for options with a default.                               [boolean] [default: false]
+
+  `--force`        Force overwriting of existing files.                                                        [boolean] [default: false]
+
+po ovim komandama ako bi ukucali `ng g c nav --dry-run` možemo vidjeti šta bi sve ovom komandom kreirali
+
+![Alt text](<Screenshot 2024-01-08 201508-1.png>)
+međutim između ostalog na ovaj način bi kreirali i spec. FILE koji inače služi za testiranje, pošto nama ne treba nećemo ga kreirati tako da će naša komanda biti
+`ng g c nav --skip-tests` i uspješno smo kreirali novi folder *nav* unutar kojeg su tri nove komponente
+
+![Alt text](<Screenshot 2024-01-08 202246.png>)
+
+a ako odemo u app.module.ts vidimo da je NavComponenta dodana u declarations
+
+![Alt text](<Screenshot 2024-01-08 202644.png>)
+
+Ako nakon toga odemo u nav.component.ts vidimo da je naš selektor za naš nav bar `selector: 'app-nav'`
+![Alt text](<Screenshot 2024-01-08 203121.png>)
+
+te ako dodamo našu komponentu u app.component.html u aplikaciji će nam se prikazati naš nav bar
+![Alt text](<Screenshot 2024-01-08 203446.png>)
+
+nakon čega nam preostaje da u nav.component.html stavimo kod za naš nav-bar (bootsrap) i dobili smo nav-bar unutar komponente, a nakon toga samo još dodajemo jedan div unutar app.component.html da bi listi naših usera dodali marginu da stoji na prikladnijem mjestu u odnosu na naš nav-bar
+
+```html
+
+<app-nav></app-nav>
+<div class="container" style="margin-top: 100px;">
+  <ul>
+    <li *ngFor="let user of users">
+         {{user.id}} - {{user.userName}}
+    </li>
+  </ul>
+</div>
+```
+
+![Alt text](<Screenshot 2024-01-08 203943.png>)
+
+![Alt text](<Screenshot 2024-01-08 204014.png>)
+
+24.Angular template forms
+
+Sljedeći nam je korak da našem korisniku damo mogućnost da popuni svoj Username i Password te da se ulogira odnosno da nam pošalje svoj username i password pritiskom na Button Login. Da bi to bili u mogućnosti moramo uvesti Angular alat koji se zove Angular forme. Prednost Angulara su njegovi framevorkovi. Prvo ćemo u app.module.ts -u importirati FormsModule.
+![Alt text](<Screenshot 2024-01-09 191424.png>)
+Nakon toga ćemo otići u nav.component.ts i kreirati ćemo proprety gdje ćemo pohraniti ono što user upiše u formu.
+![Alt text](<Screenshot 2024-01-09 193742.png>)
+
+zatim bi trebali od ove forme u nav.component.html napraviti angular formu
+
+```html
+
+<form class="d-flex">
+        <input class="form-control me-2" type="text" placeholder="Username">
+        <input class="form-control me-2" type="password" placeholder="Password">
+        <button class="btn btn-outline-success" type="submit">Login</button>
+      </form>
+```
+
+nakon što smo je pretvorili u angular:
+
+```html
+
+ <form #logiForm="ngForm" class="d-flex" (ngSubmit)="login()" autocomplete="off">
+        <input
+          name="username"
+        [(ngModel)]="model.username"
+        class="form-control me-2"
+        type="text"
+        placeholder="Username">
+
+        <input
+        name="password"
+        [(ngModel)]="model.password"
+        class="form-control me-2"
+        type="password"
+        placeholder="Password">
+        <button class="btn btn-outline-success" type="submit">Login</button>
+      </form>
+```
+
+`#loginForm="ngForm"`: Ovde se koristi #loginForm da bi se dobio referenca na formu. Ovo se često koristi za pristup informacijama o stanju forme ili za ručnu validaciju. ngForm je Angular direktiva koja se koristi za manipulaciju i praćenje stanja Template-driven forme.
+
+(ngSubmit)="login()": Ova direktiva se koristi za hvatanje događaja podnošenja forme. Kada se forma podnese, poziva se metoda login() koja se nalazi u vašem komponentnom kodu.
+
+[(ngModel)]="model.username" i [(ngModel)]="model.password": Ove direktive se koriste za dvosmerno vezivanje podataka između polja forme i modela u komponenti. model u ovom kontekstu verovatno predstavlja objekat u vašem komponentnom kodu koji sadrži username i password svojstva.
+
+class="form-control me-2": Ova klasa se primenjuje na input elemente kako bi se primenio određeni stil, najverovatnije Bootstrap stil za formularska polja.
+
+type="submit": Ovaj atribut govori pregledaču da se ovaj button koristi za podnošenje forme. Kada se pritisne, izvršava se metoda login() koja je definisana u komponenti.
+
+autocomplete="off": Ova opcija isključuje automatsko popunjavanje ugrađenog pregledača, često korišćena za bezbednosne svrhe kada rukujete osetljivim informacijama kao što su lozinke.
+
+24.Angular services
+
+U Angular okviru, servisi su komponente koje pružaju funkcionalnosti koje su zajedničke za više delova vaše aplikacije. Servisi se koriste za deljenje logike između komponenata, omogućavajući organizaciju koda, ponovno korišćenje i lakše održavanje.
+
+Koristite Servise Kada:
+
+Djeljenje Podataka:
+Ako imate podatke koji treba biti dostupni više komponentama, servisi su odličan način za deljenje tih podataka. Na primer, možete imati servis koji sadrži zajedničke podatke ili stanje koje se koristi u više delova vaše aplikacije.
+
+Komunikacija Komponenata:
+Servisi olakšavaju komunikaciju između komponenata. Možete koristiti servis kao posrednika za razmenu informacija između različitih delova vaše aplikacije.
+
+Globalno Konfigurisanje Aplikacije:
+Ako imate podešavanja ili konfiguraciju koje treba biti dostupno širom cele aplikacije, servisi su odlično mesto za smeštanje ovih informacija.
+
+Manipulacija Podacima:
+Ako imate kompleksnu logiku manipulacije podacima koja nije direktno vezana za prikazivanje ili korisnički interfejs, možete je smestiti u servis.
+
+Izvođenje HTTP Zahtjeva:
+Servisi se često koriste za izvođenje HTTP zahteva ka serveru koristeći Angular-ov HttpClient. Ovo pomaže u odvajanju logike vezane za pristup podacima od komponenti.
+
+Da bi pohranili service u našoj aplikaciji prvo ćemo otvoriti folder _services ("__" prefiks smo dodali da bi nam bio na vrhu liste u app folderu). Zatim ćemo u terminalu dati komandu `ng g s _services/account --skip-tests` da bi kreirali file account.services.ts unutar naseg '_services' foldera. Kad smo kreirali account.services.ts uraditi ćemo sljedeće:
+![Alt text](<Screenshot 2024-01-09 205558-1.png>)
+*Ovaj servis je pripremljen da se koristi za slanje HTTP POST zahteva za operaciju prijavljivanja (login). Kada se koristi u komponenti, možete se pretplatiti na rezultat poziva login metode koristeći Angular Observables.*
+
+25.Injecting services into components
+
+Kada smo kreirali naš prvi servis u Angularu vrijeme je da ga upotrijebimo:
+
+![Alt text](<Screenshot 2024-01-10 144923.png>)
+![Alt text](<Screenshot 2024-01-10 151336.png>)
+*ako se probamo sad ulogirati sa postojećim korisnikom vidimo da nam server vraća user name i token, a ako bi ukucali krivi password vraća nam error Unauthorized Invalid password ili za krivo ime Invalid username*
+
+![Alt text](<Screenshot 2024-01-10 151853.png>)
+
+26.Using conditional to show and remove content & using angulat bootstrap components
+
+U našoj nav.component klasi ćemo dodati metodu logout i namjestit ćemo je na false `logout(){this.loggedIn = false;}`. Nakon toga ćemo u našem nav.component.html dodati angular direktivu na nav bar `*ngIf=logedIn`koja će skroz izbaciti linkove iz nav-bara iz DOM-a ako nismo ulogirani. Zatim ćemo dodati jedan div za Dropdown menu koji ćemo kasnije osposobiti sa Angular (ngx ) bootstrapom.
+
+```html
+
+<div class="dropdown" *ngIf="loggedIn" >
+        <a class="dropdown-toggle text-light ">Welcome user</a>
+        <div class="dropdown-menu">
+          <a class="dropdown-item">Edit Profile</a>
+          <a class="dropdown-item" (click)="logout()">Logout</a>
+        </div>
+
+```
+
+*s ovim kodom smo dodali jedan dropdown meni koji trenutno još nije funkcionalan, a  u koji ćemo ubaciti link Edit Profile i Logout*'
+Angular direktivu `*ngIf="!loggedIn"`ćemo upotrijebiti i za našu formu za ispunjavanje username i password da kad se ulogiramo da se makne.
+Zatim ćemo kroz terminal u našem folderu client instalirati bootstrap
+![Alt text](<Screenshot 2024-01-10 182307.png>)
+
+i zatim dodati css svojstva za meni u html tagove
+![Alt text](<Screenshot 2024-01-10 182434-1.png>)
+
+![Alt text](<Screenshot 2024-01-10 182826.png>)
+
+i u nav.component.css ćemo dodati još par svojstva
+
+```css
+.dropdown-toggle, .dropdown-item {
+  cursor: pointer;
+}
+```
+
+27.Persisting the login
+
+Da bi sačuvali naš login odnosno da bi ostao korisnik ulogiran tjekom svoje sesije odnosno dok se ne izlogira moramo negdje pohraniti njegovo korisničko ime i token. Nemožemo to uraditi u komponenti jer komponenta gubi svu memoriju prilikom odlaska u drugu komponentu. Sljedeća opcija nam je servis ali memorija servisa traje samo dok je otvorena aplikacija tako da nam preostaje još jedna opcija a to je browserov local storage.
+
+![Alt text](<Screenshot 2024-01-11 100006.png>)
+
+Startat ćemo u account.service.ts i upotrijebit ćemo pipe (RxJs) komandu da transformiramo podatke ili učinimo nešto s njima kad se vrate s API servera.
+PIPE - U RxJS-u, pipe je funkcija koja se koristi za slijedno povezivanje i obradu operacija nad Observables. Kada imate niz operacija koje želite primijeniti na Observable, koristite pipe kako biste ih spojili u jednu cjelinu. Bitno je napomenuti da su operacije koje se primjenjuju unutar pipe obično uvezenje iz rxjs/operators modula. RxJS ima bogat skup operacija (npr. map, filter, mergeMap, switchMap, itd.) koje možete koristiti unutar pipe za obradu i transformaciju podataka u Observables.
+1.map
+Služi za transformaciju vrijednosti emitiranih iz Observablea.
+Prima svaku vrijednost iz Observablea, primjenjuje zadanu funkciju transformacije na nju i emitira rezultat.
+Koristi se kada želite promijeniti format ili vrijednost emitiranu iz Observablea.
+2.filter
+Koristi se za filtriranje vrijednosti emitiranih iz Observablea.
+Prihvaća vrijednosti koje zadovoljavaju određeni uvjet, a odbacuje one koje ga ne zadovoljavaju.
+Upotrebljava se kada želite raditi s određenim subsetom vrijednosti iz Observablea.
+3.mergeMap
+Ova operacija se koristi za projekciju i spajanje unutarnjih Observablesa u jedan Observable.
+Kada se na primjer svaka vrijednost emitirana izvornog Observablea preslikava u unutarnji Observable, mergeMap kombinira emitirane vrijednosti iz svih unutarnjih Observablesa u jedan izlazni Observable.
+4.switchMap
+Slično kao mergeMap, switchMap se koristi za projekciju i spajanje unutarnjih Observablesa.
+Razlika je u tome što switchMap odbacuje prethodni unutarnji Observable čim stigne novi, fokusirajući se samo na najnoviji.
+Korisno kada radite s brzim promjenama u podacima i želite reagirati samo na najnovije vrijednosti.
+
+Prvo ćemo unutar app folder otvoriti novi folder koji ćemo nazvati _models i unutar njega  kreirati novi type (interface User) da ga možemo koristiti prilikom dodavanja nekih metoda jer radimo sa typescriptom koji od nas traži da se specifira svaki tip koji unosimo kao parametar ili povrat iz neke metode. Interface će se zvati User i kao do sad imati će dva ptopertia tipa string ,ime i token.
+![Alt text](<Screenshot 2024-01-11 102029.png>)
+
+sljedeći korak je u našem AccountService gdje ćemo dodjeliti sljedeće:
+
+![Alt text](<Screenshot 2024-01-11 104909.png>)
+
+Kad se naša aplikacija pokrene pogledat ćemo u naš locallstorage dali je korisnik ulogiran odnosno dali imamo naš user key sa vrijednostima unutra a naša root komponenta koja se prva inicijalizira je App komponenta gdje ćemo napraviti sljedeće:
+
+![Alt text](<Screenshot 2024-01-11 115217.png>)
+
+Sljedeći korak je da odemo u naš nav.component i da upotrijebimo tamo šta smo napravili da saznamo dali se naš korisnik ulogirao:
+![Alt text](<Screenshot 2024-01-11 115218.png>)
+
+Sad kad se ulogiramo u aplikaciju vidimo da je user i token spremljen u localstorage i kad refreshamo browser i ako i izađemo iz aplikacije podatci se ne brišu dok se ne izlogiramo iz iste:
+
+![Alt text](<Screenshot 2024-01-11 123442.png>)
+
+28.Using async pipe
+
+U Angularu, async pipe se koristi za lakše upravljanje asinhronim podacima koji se dohvaćaju ili prate kroz Observables ili Promises. Ovaj pipe automatski pretvara asinhroni rezultat u Angular template sintaksu, olakšavajući rad s asinhronim podacima u HTML-u.
+
+Na primjer, kada koristite async pipe u Angular templateu, možete direktno raditi s asinhronim rezultatom bez potrebe za pretvaranjem ili ručnim upravljanjem pretvaranjem podataka.
+
+Kod upotrebe observable je potrebno učiniti subscribe , ali i unsubscribe osim ako se radi o http requestu. U suprotnom bi moglo doći do curenja memorije.
+
+```ts
+ngOnInit(): void {
+    this.getCurrentUser();
+  }
+
+getCurrentUser(){
+  this.accuntService.currentUser$.subscribe({
+    next: user => this.loggedIn = !!user
+  , error : error  => console.log(error)
+   } )
+```
+
+Kreirali smo metodu getcurrentUser da bi povukli našu observable iz account servica ali pomoću async pipe možemo izbrisati metodu i direktno ubrizgati observablu iz account servisa u naš html.
+
+![Alt text](<Screenshot 2024-01-12 191703.png>)
+*promjenit ćemo iz private u public da bi mogli koristiti komponentu van nače nav.ts componente*
+
+![Alt text](<Screenshot 2024-01-12 192047.png>)
+*U ngIf direktivama ćemo umjesto flag logedIn staviti direktno naše observable kreirane u našem account servisu*
