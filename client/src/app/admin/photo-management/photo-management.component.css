@@ -1,0 +1,10 @@
+img.img-thumbnail {
+  height: 175px;
+  min-width: 175px !important;
+  margin-bottom: 2px;
+  justify-self: center;
+  }
+  .content{
+    text-align: center;
+  }
+
